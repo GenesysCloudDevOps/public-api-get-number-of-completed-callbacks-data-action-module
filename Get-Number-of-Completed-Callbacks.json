@@ -1,0 +1,57 @@
+{
+  "name": "Get Number of Completed Callbacks",
+  "integrationType": "purecloud-data-actions",
+  "actionType": "custom",
+  "config": {
+    "request": {
+      "requestUrlTemplate": "/api/v2/analytics/conversations/details/query",
+      "requestType": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "requestTemplate": "{\n \"interval\": \"${input.INTERVAL_Start}/${input.INTERVAL_End}\",\n \"order\": \"asc\",\n \"orderBy\": \"conversationStart\",\n \"paging\": {\n  \"pageSize\": 25,\n  \"pageNumber\": 1\n },\n \"segmentFilters\": [\n  {\n   \"type\": \"and\",\n   \"predicates\": [\n    {\n     \"type\": \"dimension\",\n     \"dimension\": \"mediaType\",\n     \"operator\": \"matches\",\n     \"value\": \"callback\"\n    },\n    {\n     \"type\": \"dimension\",\n     \"dimension\": \"queueId\",\n     \"operator\": \"matches\",\n     \"value\": \"${input.QUEUE_ID}\"\n    }\n   ]\n  }\n ],\n \"conversationFilters\": [\n  {\n   \"type\": \"and\",\n   \"predicates\": [\n    {\n     \"type\": \"dimension\",\n     \"dimension\": \"conversationEnd\",\n     \"operator\": \"exists\",\n     \"value\": null\n    }\n   ]\n  }\n ]\n}"
+    },
+    "response": {
+      "translationMap": {},
+      "translationMapDefaults": {},
+      "successTemplate": "${rawResult}"
+    }
+  },
+  "contract": {
+    "input": {
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "required": ["INTERVAL_Start", "INTERVAL_End", "QUEUE_ID"],
+        "properties": {
+          "INTERVAL_Start": {
+            "description": "ToString(AddHours(GetCurrentDateTimeUtc(),-24))",
+            "type": "string"
+          },
+          "INTERVAL_End": {
+            "description": "ToString(GetCurrentDateTimeUtc())",
+            "type": "string"
+          },
+          "QUEUE_ID": {
+            "description": "Call.CurrentQueue",
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "output": {
+      "successSchema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "totalHits": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "secure": false
+}
